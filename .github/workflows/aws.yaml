@@ -5,10 +5,10 @@ on:
     branches: [main]
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}
-  ECS_SERVICE: ${{ secrets.AWS_ECS_SERVICE }}
-  ECS_CLUSTER: ${{ secrets.AWS_ECS_CLUSTER }}
+  AWS_REGION: ${{ secrets.AWS_REGION }} # Your choosen region
+  ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }} # Repository *name* at AWS ECR
+  ECS_SERVICE: ${{ secrets.AWS_ECS_SERVICE }} # Service name at AWS ECS
+  ECS_CLUSTER: ${{ secrets.AWS_ECS_CLUSTER }} # Cluster name at AWS ECS
   ECS_TASK_DEFINITION: .aws/task-definition.json
   CONTAINER_NAME: docker-node-aws
   ECR_IMAGE_TAG: latest
@@ -34,14 +34,15 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push image to Amazon ECR
+        id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ env.ECR_IMAGE_TAG }}
         run: |
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
