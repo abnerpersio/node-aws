@@ -7,5 +7,5 @@ routes.get('/', (_, res) => {
 });
 
 routes.get('/health', (_, res) => {
-  res.json({ success: true, message: 'I"m OK' });
+  res.json({ success: true, message: `I"m OK here. Now: ${new Date().toISOString()}` });
 });
